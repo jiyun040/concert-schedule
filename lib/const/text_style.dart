@@ -28,16 +28,16 @@ abstract final class ContiTextStyle {
 
   /// Warning
   static TextStyle warning(Color color) => _baseTextStyle.copyWith(
-    color: color,
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-  );
+        color: color,
+        fontSize: 10,
+        fontWeight: FontWeight.w500,
+      );
 
   static TextStyle smallWarn(Color color) => _baseTextStyle.copyWith(
-    color: color,
-    fontSize: 7,
-    fontWeight: FontWeight.w500,
-  );
+        color: color,
+        fontSize: 7,
+        fontWeight: FontWeight.w500,
+      );
 
   /// Main
   static TextStyle mainTab = _baseTextStyle.copyWith(
@@ -53,23 +53,24 @@ abstract final class ContiTextStyle {
   );
 
   /// Search
-  static TextStyle searchHint = _baseTextStyle.copyWith(
-    color: ContiColors.black500,
-    fontSize: 7,
-    fontWeight: FontWeight.w500,
-  );
-
   static TextStyle searchText = _baseTextStyle.copyWith(
     color: ContiColors.mainBlack,
     fontSize: 7,
     fontWeight: FontWeight.w500,
   );
 
-  static TextStyle noResult(Color color) => _baseTextStyle.copyWith(
-    color: color,
-    fontSize: 15,
+  /// Hint
+  static TextStyle hint = _baseTextStyle.copyWith(
+    color: ContiColors.black500,
+    fontSize: 10,
     fontWeight: FontWeight.w500,
   );
+
+  static TextStyle noResult(Color color) => _baseTextStyle.copyWith(
+        color: color,
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+      );
 
   /// Slide
   static TextStyle slideLocation = _baseTextStyle.copyWith(
@@ -137,10 +138,10 @@ abstract final class ContiTextStyle {
   );
 
   static TextStyle thinButton(Color color) => _baseTextStyle.copyWith(
-    color: color,
-    fontSize: 10,
-    fontWeight: FontWeight.w500,
-  );
+        color: color,
+        fontSize: 10,
+        fontWeight: FontWeight.w500,
+      );
 
   static TextStyle modifyDelete = _baseTextStyle.copyWith(
     color: ContiColors.mainBlack,

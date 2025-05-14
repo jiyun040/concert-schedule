@@ -7,9 +7,11 @@ class ContiColors {
   static Color black700 = const Color(0xFF616161);
   static Color black500 = const Color(0xFF9e9e9e);
   static Color black100 = const Color(0xFFf5f5f5);
+
   static Color mainOrange = const Color(0xFFF97724);
   static Color orange300 = const Color(0xFFF9863C);
-  static Color orange40 = const Color(0xFFFB9F63);
+  static Color orange200 = const Color(0xFFFA8B44);
+
   static Color green = const Color(0xFF14A427);
   static Color blue = const Color(0xFF3761B5);
   static Color red = const Color(0xFFEC2929);
