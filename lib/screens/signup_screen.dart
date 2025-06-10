@@ -1,44 +1,52 @@
-import 'package:concert_schedule/const/colors.dart';
-import 'package:concert_schedule/const/text_style.dart';
-import 'package:concert_schedule/widgets/bottom_button.dart';
-import 'package:concert_schedule/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-<<<<<<< HEAD
+import '../const/colors.dart';
+import '../const/text_style.dart';
+import '../widgets/input_field.dart';
+import '../widgets/bottom_button.dart';
 
-=======
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
-import '../utils/input_validator.dart';
-
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _pwController = TextEditingController();
+  final TextEditingController _pwConfirmController = TextEditingController();
+
   String? errorMessage;
 
   @override
   void dispose() {
     _idController.dispose();
     _pwController.dispose();
+    _pwConfirmController.dispose();
     super.dispose();
   }
 
+  // TODO: 서버 연동 후 삭제 예정 (임시 아이디 중복 체크)
+  bool _isDuplicateId(String id) {
+    return id == "asdf"; // 예시: "asdf"는 이미 존재하는 아이디
+  }
+
   void _validateAndSubmit() {
-    final id = _idController.text;
+    final id = _idController.text.trim();
     final pw = _pwController.text;
+    final pwConfirm = _pwConfirmController.text;
 
-    final isValid =
-        InputValidator.isValidId(id) && InputValidator.isValidPassword(pw);
-
-    if (!isValid) {
+    if (_isDuplicateId(id)) {
       setState(() {
-        errorMessage = '정보가 일치하지 않습니다. 다시 확인 해 주세요.';
+        errorMessage = '중복된 아이디 입니다. 다른 아이디로 바꿔주세요.';
+      });
+      return;
+    }
+
+    if (pw != pwConfirm) {
+      setState(() {
+        errorMessage = '비밀번호가 일치하지 않습니다. 다시 확인 해 주세요.';
       });
       return;
     }
@@ -47,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
       errorMessage = null;
     });
 
-    // 로그인 성공 시 실행할 코드
+    // 가입 처리 실행 코드
   }
 
   @override
@@ -60,28 +68,24 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: ContiColors.white,
           elevation: 0,
           leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: ContiColors.orange200,
-              )),
+            icon: Icon(Icons.arrow_back_ios, color: ContiColors.orange200),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
-<<<<<<< HEAD
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-=======
               crossAxisAlignment: CrossAxisAlignment.start,
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
               children: [
                 Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: Center(
-                      child: Image.asset('assets/image/logo.png',
-                          width: MediaQuery.of(context).size.width * 0.5)),
+                    child: Image.asset(
+                      'assets/image/logo.png',
+                      width: MediaQuery.of(context).size.width * 0.5,
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -108,10 +112,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-<<<<<<< HEAD
-
-=======
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: InputField(
+                    controller: _pwConfirmController,
+                    labelText: '비밀번호 확인',
+                    hintText: '비밀번호를 확인해 주세요.',
+                    obsecureText: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z_]')),
+                      LengthLimitingTextInputFormatter(15),
+                    ],
+                  ),
+                ),
                 if (errorMessage != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
@@ -120,14 +133,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ContiTextStyle.warning(ContiColors.red),
                     ),
                   ),
-<<<<<<< HEAD
-
-=======
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: BottomButton(
-                    text: '로그인',
+                    text: '회원가입',
                     onTap: _validateAndSubmit,
                   ),
                 ),
