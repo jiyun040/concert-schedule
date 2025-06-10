@@ -22,7 +22,7 @@ class BottomButton extends StatelessWidget {
       onTap: onTap ?? () {},
       child: Container(
         width: width ?? double.infinity,
-        height: height ?? 40,
+        height: height ?? 45,
         alignment: Alignment.center,
         decoration: BoxDecoration(
             color: ContiColors.orange200,
