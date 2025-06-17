@@ -9,6 +9,7 @@ class Performance {
   DateTime endDate;
   String? imageUrl;
   String category;
+  bool isInMyList;
   bool isFavorite;
 
   Performance({
@@ -19,21 +20,14 @@ class Performance {
     required this.endDate,
     this.imageUrl,
     required this.category,
+    this.isInMyList = false,
     this.isFavorite = false,
   });
 }
 
-class PerformanceListScreen extends StatefulWidget {
-  final bool showFavoritesOnly;
-
-  const PerformanceListScreen({Key? key, this.showFavoritesOnly = false}) : super(key: key);
-
-  @override
-  _PerformanceListScreenState createState() => _PerformanceListScreenState();
-}
-
-class _PerformanceListScreenState extends State<PerformanceListScreen> {
-  List<Performance> _allPerformances = [
+// 전역 공연 데이터 (실제로는 데이터베이스나 API에서 가져올 데이터)
+class PerformanceData {
+  static List<Performance> allPerformances = [
     Performance(
       id: '1',
       title: 'KT&G 상상실험 뮤지컬페스티벌',
@@ -76,11 +70,46 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
     ),
   ];
 
+  // 내 리스트에 추가된 공연들 (D-day 순으로 정렬)
+  static List<Performance> get myListPerformances {
+    return allPerformances
+        .where((p) => p.isInMyList)
+        .toList()
+      ..sort((a, b) {
+        final aDDay = _calculateDDay(a.startDate);
+        final bDDay = _calculateDDay(b.startDate);
+        return aDDay.compareTo(bDDay);
+      });
+  }
+
+  // 찜한 공연들
+  static List<Performance> get favoritePerformances {
+    return allPerformances.where((p) => p.isFavorite).toList();
+  }
+
+  static int _calculateDDay(DateTime performanceDate) {
+    final now = DateTime.now();
+    final difference = performanceDate.difference(DateTime(now.year, now.month, now.day)).inDays;
+    return difference;
+  }
+}
+
+class PerformanceListScreen extends StatefulWidget {
+  final bool showFavoritesOnly;
+
+  const PerformanceListScreen({Key? key, this.showFavoritesOnly = false}) : super(key: key);
+
+  @override
+  _PerformanceListScreenState createState() => _PerformanceListScreenState();
+}
+
+class _PerformanceListScreenState extends State<PerformanceListScreen> {
+
   List<Performance> get _displayPerformances {
     if (widget.showFavoritesOnly) {
-      return _allPerformances.where((p) => p.isFavorite).toList();
+      return PerformanceData.favoritePerformances;
     }
-    return _allPerformances;
+    return PerformanceData.myListPerformances;
   }
 
   int _calculateDDay(DateTime performanceDate) {
@@ -103,17 +132,42 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
     return 'D-$dDay';
   }
 
-  void _toggleFavorite(Performance performance) {
-    setState(() {
-      performance.isFavorite = !performance.isFavorite;
-    });
-
-    if (performance.isFavorite) {
-      _showAddedToFavoritesDialog(performance);
-    }
+  void _showPerformanceDetail(Performance performance) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildPerformanceDetailSheet(performance),
+    );
   }
 
-  void _showAddedToFavoritesDialog(Performance performance) {
+  void _addToMyList(Performance performance) {
+    if (performance.isInMyList) {
+      _showDuplicateDialog('이미 추가된 공연입니다.\n중복으로 추가할 수 없습니다.');
+      return;
+    }
+
+    setState(() {
+      performance.isInMyList = true;
+    });
+
+    _showSuccessDialog('리스트에 추가되었습니다!', performance.title);
+  }
+
+  void _addToFavorites(Performance performance) {
+    if (performance.isFavorite) {
+      _showDuplicateDialog('이미 찜한 공연입니다.\n중복으로 찜할 수 없습니다.');
+      return;
+    }
+
+    setState(() {
+      performance.isFavorite = true;
+    });
+
+    _showSuccessDialog('찜 목록에 추가되었습니다!', performance.title);
+  }
+
+  void _showDuplicateDialog(String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -126,25 +180,17 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.favorite,
-                color: Colors.red,
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
                 size: 48,
               ),
               SizedBox(height: 16),
               Text(
-                '찜 목록에 추가되었습니다!',
+                message,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: ContiColors.mainBlack,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                performance.title,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: ContiColors.black500,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -167,7 +213,7 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
     );
   }
 
-  void _showDuplicateDialog() {
+  void _showSuccessDialog(String message, String performanceTitle) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -180,18 +226,27 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.orange,
+                Icons.check_circle,
+                color: ContiColors.mainOrange,
                 size: 48,
               ),
               SizedBox(height: 16),
               Text(
-                '이미 찜 목록에 있는 공연입니다.',
+                message,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: ContiColors.mainBlack,
                 ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                performanceTitle,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: ContiColors.black500,
+                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -209,15 +264,6 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
           ],
         );
       },
-    );
-  }
-
-  void _showPerformanceDetail(Performance performance) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildPerformanceDetailSheet(performance),
     );
   }
 
@@ -339,12 +385,8 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            if (performance.isFavorite) {
-                              _showDuplicateDialog();
-                            } else {
-                              _toggleFavorite(performance);
-                              Navigator.pop(context);
-                            }
+                            Navigator.pop(context);
+                            _addToFavorites(performance);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: performance.isFavorite
@@ -356,7 +398,7 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
-                            performance.isFavorite ? '이미 찜한 공연' : '찜하기',
+                            performance.isFavorite ? '이미 찜한 공연' : '공연 찜하기',
                             style: TextStyle(
                               color: ContiColors.white,
                               fontSize: 16,
@@ -370,20 +412,28 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pop(context);
-                            // 공연 등록 화면으로 이동
+                            _addToMyList(performance);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ContiColors.white,
-                            side: BorderSide(color: ContiColors.mainOrange),
+                            backgroundColor: performance.isInMyList
+                                ? Colors.grey
+                                : ContiColors.white,
+                            side: BorderSide(
+                                color: performance.isInMyList
+                                    ? Colors.grey
+                                    : ContiColors.mainOrange
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
-                            '공연 등록',
+                            performance.isInMyList ? '이미 추가된 공연' : '리스트 추가',
                             style: TextStyle(
-                              color: ContiColors.mainOrange,
+                              color: performance.isInMyList
+                                  ? Colors.grey[600]
+                                  : ContiColors.mainOrange,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -407,171 +457,111 @@ class _PerformanceListScreenState extends State<PerformanceListScreen> {
 
     return Scaffold(
       backgroundColor: ContiColors.black100,
-      body: Column(
-        children: [
-          // 상단 헤더 영역
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(20, 40, 20, 0),
-            decoration: BoxDecoration(
-              color: ContiColors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
+      body: displayPerformances.isEmpty
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              widget.showFavoritesOnly ? Icons.favorite : Icons.music_note,
+              size: 60,
+              color: Colors.grey[400],
             ),
-          ),
+            SizedBox(height: 16),
+            Text(
+              widget.showFavoritesOnly
+                  ? '찜한 공연이 없습니다.'
+                  : '리스트에 추가된 공연이 없습니다.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Text(
+              widget.showFavoritesOnly
+                  ? '공연 상세 페이지에서 찜하기를 눌러보세요!'
+                  : '공연 상세 페이지에서 리스트 추가를 눌러보세요!',
+              style: TextStyle(color: Colors.grey[500], fontSize: 14),
+            ),
+          ],
+        ),
+      )
+          : ListView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: displayPerformances.length,
+        itemBuilder: (context, index) {
+          final performance = displayPerformances[index];
+          final dDay = _calculateDDay(performance.startDate);
 
-          // 공연 목록
-          Expanded(
-            child: displayPerformances.isEmpty
-                ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    widget.showFavoritesOnly ? Icons.favorite_border : Icons.music_note,
-                    size: 60,
-                    color: Colors.grey[400],
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    widget.showFavoritesOnly
-                        ? '찜한 공연이 없습니다.'
-                        : '등록된 공연이 없습니다.',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          return GestureDetector(
+            onTap: () => _showPerformanceDetail(performance),
+            child: Container(
+              margin: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: ContiColors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
-            )
-                : ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: displayPerformances.length,
-              itemBuilder: (context, index) {
-                final performance = displayPerformances[index];
-                final dDay = _calculateDDay(performance.startDate);
-
-                return GestureDetector(
-                  onTap: () => _showPerformanceDetail(performance),
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 12),
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: ContiColors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                performance.title,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: ContiColors.mainBlack,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                performance.venue,
-                                style: TextStyle(
-                                  color: ContiColors.black500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                '${performance.startDate.year}.${performance.startDate.month.toString().padLeft(2, '0')}.${performance.startDate.day.toString().padLeft(2, '0')} ~ ${performance.endDate.year}.${performance.endDate.month.toString().padLeft(2, '0')}.${performance.endDate.day.toString().padLeft(2, '0')}',
-                                style: TextStyle(
-                                  color: ContiColors.black500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                        Text(
+                          performance.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: ContiColors.mainBlack,
                           ),
                         ),
-                        Column(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _getDDayColor(dDay),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _getDDayText(dDay),
-                                style: TextStyle(
-                                  color: ContiColors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {
-                                if (performance.isFavorite) {
-                                  _showDuplicateDialog();
-                                } else {
-                                  _toggleFavorite(performance);
-                                }
-                              },
-                              child: Icon(
-                                performance.isFavorite
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: performance.isFavorite
-                                    ? Colors.red
-                                    : Colors.grey,
-                                size: 24,
-                              ),
-                            ),
-                          ],
+                        SizedBox(height: 4),
+                        Text(
+                          performance.venue,
+                          style: TextStyle(
+                            color: ContiColors.black500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          '${performance.startDate.year}.${performance.startDate.month.toString().padLeft(2, '0')}.${performance.startDate.day.toString().padLeft(2, '0')} ~ ${performance.endDate.year}.${performance.endDate.month.toString().padLeft(2, '0')}.${performance.endDate.day.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                            color: ContiColors.black500,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                );
-              },
+                  // D-Day만 표시 (찜 버튼 제거)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getDDayColor(dDay),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _getDDayText(dDay),
+                      style: TextStyle(
+                        color: ContiColors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
-    );
-  }
-
-  Widget _buildTabItem(String title, bool isSelected) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? ContiColors.mainOrange : ContiColors.black500,
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-        SizedBox(height: 4),
-        if (isSelected)
-          Container(
-            height: 2,
-            width: 40,
-            color: ContiColors.mainOrange,
-          ),
-      ],
     );
   }
 }

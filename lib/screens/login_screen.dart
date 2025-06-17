@@ -4,10 +4,6 @@ import 'package:concert_schedule/widgets/bottom_button.dart';
 import 'package:concert_schedule/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-<<<<<<< HEAD
-
-=======
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
 import '../utils/input_validator.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -70,12 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
-<<<<<<< HEAD
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-=======
-              crossAxisAlignment: CrossAxisAlignment.start,
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
               children: [
                 Padding(
                   padding: EdgeInsets.all(20),
@@ -108,22 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-<<<<<<< HEAD
-
-=======
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
-                if (errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Text(
-                      errorMessage!,
-                      style: ContiTextStyle.warning(ContiColors.red),
-                    ),
-                  ),
-<<<<<<< HEAD
-
-=======
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: BottomButton(

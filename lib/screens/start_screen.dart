@@ -36,11 +36,6 @@ class StartScreen extends StatelessWidget {
                         text: '회원가입',
                         width: double.infinity,
                         onTap: () {
-<<<<<<< HEAD
-                          Navigator.pushNamed(context, '/join');
-=======
-                          Navigator.pushNamed(context, '/signup');
->>>>>>> ea16fd7 (login_screen 등 화면 추가)
                         }
                       ),
                     ],

@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   bool isSearching = false;
   bool hasResult = false;
   String searchQuery = '';
-  int? selectedTabIndex; // 선택된 탭 인덱스 (null이면 메인 화면)
+  int? selectedTabIndex;
   final TextEditingController _searchController = TextEditingController();
 
   final List<String> tabs = [
@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   final List<Map<String, String>> performances = [
     {
-      'title': 'KT&G 상상실현 페스티벌',
+      'title': '뷰티풀 민트 라이프',
       'image': 'https://via.placeholder.com/300x180.png?text=KT%26G+페스티벌',
       'date': '2025.04.18 ~ 2025.04.19',
     },
@@ -410,7 +410,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           decoration: BoxDecoration(
-                            border: Border(S
+                            border: Border(
                               bottom: BorderSide(
                                 color: isSelected ? ContiColors.mainOrange : Colors.transparent,
                               ),
